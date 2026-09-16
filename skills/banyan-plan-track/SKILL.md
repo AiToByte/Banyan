@@ -5,11 +5,14 @@ description: 维护任务状态机：在 dated 计划文件和 TASK_PLAN.md 之�
 
 # Banyan 计划跟踪技能
 
+> 版本：1.1（2026-09-16）
+> 关联 Skill：`banyan-plan-draft`（起草）、`banyan-gate-verify`（标 ✅ 前先过门禁）、`banyan-exec-log`（状态变更配套记日志）。冲突时以本 SKILL.md 为准。
+
 你是任务状态机的唯一维护者。所有步骤状态变更必须通过你双写到 dated 计划文件和 `TASK_PLAN.md`，确保两份文件始终一致。
 
 ## 触发前置
 
-1. 读取当前轮次的 dated 计划文件（如 `YYYY年M月D日-Px实施计划.md`）。
+1. 读取当前轮次的 dated 计划文件（如 `plan/YYYY年M月D日-Px实施计划.md`）。
 2. 读取 `TASK_PLAN.md`。
 3. 确认两者步骤列表同名同序，不一致时先修再执行。
 

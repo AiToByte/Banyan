@@ -1,0 +1,4 @@
+# Banyan: Skill 发现路径为本地链接（scripts/install-skills.* 重建），不入库
+.claude/skills/
+.opencode/skills/
+.agents/skills/

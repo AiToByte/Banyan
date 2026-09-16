@@ -5,6 +5,9 @@ description: 将需求拆解为可执行的分阶段计划并初始化双轨文�
 
 # Banyan 计划起草技能
 
+> 版本：1.1（2026-09-16）
+> 关联 Skill：`banyan-plan-track`（状态双写）、`banyan-exec-log`（日志双写）。计划文件落 `plan/`，冲突时以本 SKILL.md 为准。
+
 你必须在任何代码修改前，将需求转化为结构化的分阶段实施计划。计划格式遵循 iot-kernel 跟踪表规范，并同步初始化 Banyan 双轨文件。
 
 ## 触发前置
@@ -16,7 +19,7 @@ description: 将需求拆解为可执行的分阶段计划并初始化双轨文�
 ## 拆解方法
 
 1. 将需求分解为 **4-8 个原子步骤**，每个步骤必须：
-   - 有明确的可验证标准（如 `cargo test --workspace 全绿`、`grep "pub fn encode_" 除 X 外全 Result`、`新增 N 个单测`）
+   - 有明确的可验证标准（如 `cargo test --workspace 全绿`、`grep "pub fn encode_" 除 X 外全 Result`、`新增 N 个单测`；文档型任务如 `死链 0`、`中文标点合规`、`指定文件落盘`）
    - 可独立验证（不依赖后续步骤的输出）
    - 标注前置依赖（如有 `P1-1 完成后才可启动 P1-2`）
 
@@ -28,7 +31,7 @@ description: 将需求拆解为可执行的分阶段计划并初始化双轨文�
 
 ### 产物 1：dated 计划文件
 
-写入 Banyan 根目录，命名格式：`YYYY年M月D日-P{N}实施计划.md`（如 `2026年9月16日-P2P3实施计划.md`）。
+写入 `plan/` 目录，命名格式：`plan/YYYY年M月D日-P{N}实施计划.md`（时间+计划号，如 `plan/2026年9月16日-P2P3实施计划.md`）。
 
 严格遵循 `templates/plan-template.md` 格式，必须包含以下节：
 

@@ -5,6 +5,9 @@ description: 维护 append-only 执行流水账：在 EXEC_LOG.md 和 dated 计�
 
 # Banyan 执行日志技能
 
+> 版本：1.1（2026-09-16）
+> 关联 Skill：`banyan-plan-track`（状态变更配套记日志）、`banyan-gate-verify`（门禁报告片段归档）。冲突时以本 SKILL.md 为准。
+
 你是执行流水账的写入者。所有操作记录必须 append-only（只追加，不修改历史行），并双写到两个位置。
 
 ## 触发前置
@@ -17,7 +20,7 @@ description: 维护 append-only 执行流水账：在 EXEC_LOG.md 和 dated 计�
 | 位置 | 文件 | 内容粒度 |
 |------|------|----------|
 | 详版 | `EXEC_LOG.md` | 完整记录（时间、操作、验证、问题、下一步） |
-| 摘要版 | dated 计划文件文末 `##执行日志` | 一行摘要（`* YYYY-MM-DD：……`） |
+| 摘要版 | `plan/` 下 dated 计划文件文末 `##执行日志` | 一行摘要（`* YYYY-MM-DD：……`） |
 
 ## 日志片段类型
 
@@ -43,7 +46,7 @@ description: 维护 append-only 执行流水账：在 EXEC_LOG.md 和 dated 计�
 - **下一步建议**：……
 ```
 
-追加到 dated 计划文件 `##执行日志`：
+追加到 `plan/` 下 dated 计划文件 `##执行日志`：
 
 ```
 * YYYY-MM-DD：[步骤] 完成：[一句话摘要]（含门禁结果和数量变化）

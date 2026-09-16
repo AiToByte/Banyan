@@ -1,8 +1,9 @@
 # Banyan Skill 套件使用手册
 
-> 版本：1.0（2026-09-16）
+> 版本：1.1（2026-09-16，由 `manual/manual-4.md` v1.0 升格，P1 文档治理）
 > 适用：Banyan 项目 `skills/` 目录下的 5 个 iot-kernel 式计划管理 Skill
 > 目标读者：使用 Claude Code / OpenCode / Codex / Gemini CLI 等编程 Agent 的用户，以及跨会话接手任务的任何 Agent。
+> 相关：入口见 `README.md`，常见问题见 `docs/faq.md`，任务跟踪表见 `plan/` 下 dated 计划文件。
 
 ---
 
@@ -72,11 +73,18 @@ banyan-resume（新会话从断点接力）
 
 ```
 Banyan/
+├── README.md                        # 中英双语入口
 ├── CLAUDE.md                        # 任务执行与断点续传协议（总纲）
-├── TASK_PLAN.md                     # 总体执行计划 + 实时进度状态机
-├── EXEC_LOG.md                      # 详细执行流水账
-├── YYYY年M月D日-Px实施计划.md        # dated 计划文件（本轮实施跟踪表）
-├── skills/                          # 规范目录（Skill 源文件常驻于此）
+├── TASK_PLAN.md                     # 总体执行计划 + 实时进度状态机（精简投影）
+├── EXEC_LOG.md                      # 详细执行流水账（append-only）
+├── plan/                            # dated 计划文件（时间+计划号命名，执行跟踪表）
+│   └── 2026年9月16日-P1实施计划.md
+├── docs/
+│   ├── index.md                     # 文档导航
+│   ├── handbook.md                  # 本手册（现行）
+│   ├── faq.md                       # 常见问题
+│   └── archive/                     # 历史归档（manual-1~3，仅追溯）
+├── skills/                          # 规范目录（Skill 源文件常驻于此，唯一源）
 │   ├── banyan-plan-draft/
 │   │   ├── SKILL.md
 │   │   ├── templates/plan-template.md
@@ -92,9 +100,12 @@ Banyan/
 │   │   └── templates/log-fragments.md
 │   └── banyan-resume/
 │       └── SKILL.md
-├── .claude/skills/                  # Claude Code 发现路径（目录联接）
-├── .opencode/skills/                # OpenCode 发现路径（目录联接）
-└── .agents/skills/                  # Codex / Gemini CLI / OpenCode 兼容路径（目录联接）
+├── scripts/                         # 安装与校验脚本
+│   ├── install-skills.ps1           # Windows 重建链接（首选）
+│   └── install-skills.sh            # macOS / Linux 重建链接
+├── .claude/skills/                  # Claude Code 发现路径（链接，由脚本重建）
+├── .opencode/skills/                # OpenCode 发现路径（链接，由脚本重建）
+└── .agents/skills/                  # Codex / Gemini CLI / OpenCode 兼容路径（链接，由脚本重建）
 ```
 
 ### 2.2 发现路径说明
@@ -109,12 +120,25 @@ Banyan/
 | Gemini CLI | `.agents/skills/` | ✅ 目录联接 |
 | GitHub Copilot | `.github/copilot/skills/` | 按需补充 |
 
-### 2.3 创建 / 维护目录联接
+### 2.3 创建 / 维护目录联接（首选脚本，一键重建）
+
+> 首选直接运行仓库脚本（自动删旧副本→建链接→校验 15 条链路）：
+>
+> ```powershell
+> # Windows（PowerShell 5.1 可用，/J 免管理员）
+> powershell -ExecutionPolicy Bypass -File scripts/install-skills.ps1
+> ```
+> ```bash
+> # macOS / Linux
+> bash scripts/install-skills.sh
+> ```
+>
+> 以下为脚本所做事项的手动等价命令（仅脚本不可用时使用）：
 
 Windows（`mklink /J`，免管理员）：
 
 ```powershell
-mkdir -p .claude\skills .opencode\skills .agents\skills
+New-Item -ItemType Directory -Force .claude\skills, .opencode\skills, .agents\skills
 foreach ($s in "banyan-plan-draft","banyan-plan-track","banyan-gate-verify","banyan-exec-log","banyan-resume") {
   cmd /c mklink /J ".claude\skills\$s"   "skills\$s"
   cmd /c mklink /J ".opencode\skills\$s" "skills\$s"
@@ -222,7 +246,7 @@ head -4 skills/banyan-resume/SKILL.md       # mac/linux，应见 YAML frontmatte
 
 ### 产出
 
-1. **dated 计划文件**（Banyan 根目录）：`YYYY年M月D日-Px实施计划.md`
+1. **dated 计划文件**（`plan/` 目录，时间+计划号命名）：`plan/YYYY年M月D日-Px实施计划.md`
 2. **`TASK_PLAN.md`**（覆盖或新建）
 
 ### 最小模板速查
@@ -533,29 +557,16 @@ dated 文末同步一行：
 
 ## 7. 常见问题（FAQ）
 
-**Q1：一定要建三种目录联接吗？只用一个行不行？**
-至少建你实际使用 Agent 对应的路径。Claude Code 只需 `.claude/skills/`；OpenCode 只需 `.opencode/skills/`（它也读 `.claude/`）。三路都建 == 全覆盖，多花几秒。
-
-**Q2：Windows 上 `mklink /J` 和 `ln -s` 什么区别？**
-`/J` 是目录联接，不需要管理员权限；`ln -s` 是符号链接，可能需要开发者模式。Windows 推荐 `/J`。跨平台仓库建议用 `ln -s` 并在 README 写清。
-
-**Q3：Agent 没自动触发 Skill 怎么办？**
-先确认发现路径正确、文件名必须是全大写 `SKILL.md`、frontmatter 含 `name` 和 `description`。仍不触发就手动 `/banyan-plan-draft` 或 `/banyan-resume` 显式调用。
-
-**Q4：`TASK_PLAN.md` 和 dated 文件状态不一致了？**
-执行 `banyan-plan-track` 修复：先修一致再施工，修复动作记入 `EXEC_LOG.md`。不要各自为政。
-
-**Q5：已经完成的步骤能回退吗？**
-除非用户明确要求，`✅` 不回退。发现错误应作为新的后续步骤处理，而不是改写历史。
-
-**Q6：计划步骤超过 8 个怎么办？**
-合并相关步骤，或拆成多轮（每个 dated 文件一轮）。拆解表（子项）不计入 4–8 上限，粒度高时用子项表表达。
-
-**Q7：手册 / 模板和 Skill 内置指令冲突听谁的？**
-以 `skills/<name>/SKILL.md` 为准。本手册是学习资料，SKILL.md 是运行期强约束。
-
-**Q8：不用声明文件堆太多吗？文件会泛滥吗？**
-dated 文件一轮一个，命名带日期天然归档；`TASK_PLAN.md` 和 `EXEC_LOG.md` 固定两个，持续追加/覆盖。不会膨胀。
+> 完整版已抽出为 [`faq.md`](faq.md)，此处仅保留速查索引。手册与 FAQ 冲突时以各 `skills/<name>/SKILL.md` 为准。
+>
+> - Q1 多路径是否都要建 → 至少建你用的 Agent 对应的那路，全建最省心
+> - Q2 `mklink /J` 与 `ln -s` 区别 → Windows 用 `/J` 免管理员，详见 Q2
+> - Q3 Agent 没自动触发 → 查 `SKILL.md` 文件名/ frontmatter，不行就手动 `/banyan-*` 显式调用
+> - Q4 双轨状态不一致 → 先修一致再施工，记入 `EXEC_LOG.md`
+> - Q5 完成步骤能否回退 → 默认不可，除非用户明确要求
+> - Q6 超过 8 步 → 合并或拆多轮，子项表不计入上限
+> - Q7 手册与 SKILL 冲突听谁 → 听 `SKILL.md`
+> - Q8 文件会泛滥吗 → dated 一轮一个自然归档，不会膨胀
 
 ---
 

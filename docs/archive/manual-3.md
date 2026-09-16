@@ -1,3 +1,7 @@
+> **历史归档，仅供追溯**：本文件提出的 `agent-task.py` 单文件 CLI 方案**已作废**，其思想已被 `skills/` 下 5 个 Skill 套件取代。保留仅为追溯设计演进，现行以 `docs/handbook.md` 为准。归档时间 2026-09-16（P1 文档治理）。
+
+---
+
 结合我的详细需求, 先给我一个适用于 claudecode, opencode, codex, pi等多编程Agent的Skill或通用工具
 
 
