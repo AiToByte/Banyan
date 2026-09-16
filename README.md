@@ -41,19 +41,45 @@ Banyan 的解决思路是**外部状态持久化 + 上下文解耦**：不依赖
 
 ### 3 分钟快速开始
 
-```powershell
-# 1. 重建各 Agent 的 Skill 发现链接（Windows）
-powershell -ExecutionPolicy Bypass -File scripts/install-skills.ps1
+> **零安装一句话直驱（首选）**：下面任选一句复制给 AI，不用记命令、不用建链接，Win/mac 通用——AI 自己读 skills 并开工。
 
-# macOS / Linux
-# bash scripts/install-skills.sh
+本地仓库（已在 Banyan 目录里开 Agent）：
+
+> 请读取本仓库 skills/banyan-plan-draft、banyan-plan-track、banyan-gate-verify、banyan-exec-log、banyan-resume 下的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+
+新项目（空目录开 Agent，AI 自己 clone）：
+
+> 把 https://github.com/AiToByte/Banyan 克隆到 ./banyan-skills，读取其中 5 个 Skill 的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+
+> **进阶：自动触发**：想让 Agent 不用读文件自动触发 Skill，再运行下面对应的一行命令（装完脚本会直接给出 5 句可用话）。
+
+```powershell
+# Windows（一行命令，/J 免管理员）
+powershell -ExecutionPolicy Bypass -File scripts/install-skills.ps1
 ```
+
+```bash
+# macOS / Linux（一行命令，无需 sudo）
+bash scripts/install-skills.sh
+```
+
+装完先说这句（推荐首句）：**"这个需求先出方案再动手，拆成步骤存下来。"**
 
 然后对 Agent 说：
 
 1. **新任务**："帮我实现 XXX。先制定计划。"→ Agent 触发 `banyan-plan-draft`，在 `plan/` 建 dated 计划 + 初始化 `TASK_PLAN.md`，向你确认后开工。
 2. **执行中**：Agent 按 `plan-track` 双写状态、`exec-log` 追加日志、`gate-verify` 跑门禁，全绿才标 `✅`。
 3. **中断接力**：新窗口只说"继续任务" → Agent 触发 `banyan-resume`，三读双轨文件，输出断点接力报告并直接继续。
+
+**一句话速查**（复制即用，不用敲 `/命令`；与 `docs/handbook.md` §5 同步）：
+
+| 想做的事 | 直接说这一句 |
+|----------|--------------|
+| 出方案 | 这个需求先出方案再动手，拆成步骤存下来。 |
+| 更新进度 | 这步做完了（/卡住了），进度更新下。 |
+| 验收 | 这步改完了，跑下门禁看看能不能合。 |
+| 记现场 | 刚才的改动和报错记一下。 |
+| 换会话接力 | 继续任务，直接从断点往下做。 |
 
 换模型接力指令（一句话即可）：
 

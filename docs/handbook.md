@@ -69,6 +69,20 @@ banyan-resume（新会话从断点接力）
 
 ## 2. 安装与发现路径
 
+### 2.0 免安装直驱（首选，不用记命令）
+
+复制下面一句给任何 Agent（Claude Code / OpenCode / Codex / Gemini CLI），它自己读 `skills/` 并开工，不建链接、不敲命令，Win/mac 通用：
+
+本地仓库版：
+
+> 请读取本仓库 skills/banyan-plan-draft、banyan-plan-track、banyan-gate-verify、banyan-exec-log、banyan-resume 下的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+
+新项目版（空目录，AI 自己 clone）：
+
+> 把 https://github.com/AiToByte/Banyan 克隆到 ./banyan-skills，读取其中 5 个 Skill 的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+
+直驱覆盖日常使用；下面 2.1–2.4 的链接安装是"自动触发"增强项（装完 Agent 无需指引自动加载），按需再做。
+
 ### 2.1 目录结构
 
 ```
@@ -122,7 +136,7 @@ Banyan/
 
 ### 2.3 创建 / 维护目录联接（首选脚本，一键重建）
 
-> 首选直接运行仓库脚本（自动删旧副本→建链接→校验 15 条链路）：
+> 首选直接运行仓库脚本（自动删旧副本→建链接→校验 15 条链路）。**装完脚本会直接输出 5 句可用话，照着说一句即可开工。**
 >
 > ```powershell
 > # Windows（PowerShell 5.1 可用，/J 免管理员）
@@ -499,6 +513,16 @@ dated 文末同步一行：
 ---
 
 ## 5. 典型工作流
+
+> **一句话速查表**（复制即用，不用敲 `/命令`；说下面任一句，Agent 自动触发对应 Skill。本表为唯一源，README 与 FAQ 同文案同步。）
+
+| 想做的事 | 直接说这一句 | 触发的 Skill |
+|----------|--------------|--------------|
+| 出方案 | 这个需求先出方案再动手，拆成步骤存下来。 | `banyan-plan-draft` |
+| 更新进度 | 这步做完了（/卡住了），进度更新下。 | `banyan-plan-track` |
+| 验收 | 这步改完了，跑下门禁看看能不能合。 | `banyan-gate-verify` |
+| 记现场 | 刚才的改动和报错记一下。 | `banyan-exec-log` |
+| 换会话接力 | 继续任务，直接从断点往下做。 | `banyan-resume` |
 
 ## 场景 A：全新任务从零开始（完整周期）
 
