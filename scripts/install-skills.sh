@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Banyan Skill 发现路径重建脚本（macOS / Linux）。
-# 以 skills/ 为唯一源重建符号链接，并校验 15 条链路。
+# 以 skills/ 为唯一源重建符号链接，并校验 18 条链路。
 # 兼容 macOS 自带 bash 3.2：只用 for 循环/test/readlink，不用关联数组等新特性。
 # 用法（一行命令）：bash scripts/install-skills.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SKILLS="banyan-plan-draft banyan-plan-track banyan-gate-verify banyan-exec-log banyan-resume"
+SKILLS="banyan-plan-draft banyan-plan-track banyan-gate-verify banyan-exec-log banyan-resume banyan-archive"
 TARGETS=".claude/skills .opencode/skills .agents/skills"
 
 for s in $SKILLS; do
@@ -41,7 +41,7 @@ for t in $TARGETS; do
 done
 
 if [ "$fail" -eq 0 ]; then
-  echo "ALL 15 LINKS OK"
+  echo "ALL 18 LINKS OK"
   echo ""
   echo "安装完成，直接把下面任一句发给 Agent 即可开始（不用敲 /命令）："
   echo "  出方案：这个需求先出方案再动手，拆成步骤存下来。"
@@ -49,6 +49,7 @@ if [ "$fail" -eq 0 ]; then
   echo "  验收：这步改完了，跑下门禁看看能不能合。"
   echo "  记现场：刚才的改动和报错记一下。"
   echo "  换会话接力：继续任务，直接从断点往下做。"
+  echo "  归档查旧账：这周收尾归档一下（/查一下上周日志）。"
 else
   echo "LINK CHECK FAILED"
   exit 1

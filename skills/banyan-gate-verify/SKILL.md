@@ -5,8 +5,8 @@ description: 执行分阶段验证门禁：格式检查、静态分析、测试�
 
 # Banyan 门禁验证技能
 
-> 版本：1.2（2026-09-16）
-> 关联 Skill：`banyan-plan-track`（全绿标 ✅ / 红灯标 ❌）、`banyan-exec-log`（门禁报告归档）。纯文档型任务走文档型分支（见 `references/gate-checklist.md`），四门同样必须全绿。冲突时以本 SKILL.md 为准。
+> 版本：1.3（2026-09-17）
+> 关联 Skill：`banyan-plan-track`（全绿标 ✅ / 红灯标 ❌）、`banyan-exec-log`（门禁报告归档）、`banyan-archive`（门 4 归档完整性）。纯文档型任务走文档型分支（见 `references/gate-checklist.md`），四门同样必须全绿。冲突时以本 SKILL.md 为准。
 
 你必须在每个步骤完成时执行门禁验证，只有全部通过才允许标记步骤为 `✅ 已完成`。任一红灯即标记 `❌ 受阻`。
 
@@ -90,3 +90,4 @@ cargo bench --workspace --quick    # 实际运行（可选）
 - 门禁报告必须追加到 `EXEC_LOG.md`（使用 `banyan-exec-log` 技能的片段模板）。
 - 禁止跳过门 4（即使项目无 bench 也需至少做 `--no-run` 编译检查）。
 - 门禁发现的问题必须记录到 `EXEC_LOG.md` 的 `遇到的问题与解决` 段。
+- 归档完整性（门 4 附加，凡涉及 `banyan-archive` 的步骤）：切片条目数与原文一致、首尾时间戳一致、四级 README 互链可达；任一不符即红灯。

@@ -1,7 +1,7 @@
 # Banyan Skill 套件使用手册
 
-> 版本：1.1（2026-09-16，由 `manual/manual-4.md` v1.0 升格，P1 文档治理）
-> 适用：Banyan 项目 `skills/` 目录下的 5 个 iot-kernel 式计划管理 Skill
+> 版本：1.2（2026-09-17，P5 新增 `banyan-archive` 周归档，Skill 5→6）
+> 适用：Banyan 项目 `skills/` 目录下的 6 个 iot-kernel 式计划管理 Skill
 > 目标读者：使用 Claude Code / OpenCode / Codex / Gemini CLI 等编程 Agent 的用户，以及跨会话接手任务的任何 Agent。
 > 相关：入口见 `README.md`，常见问题见 `docs/faq.md`，任务跟踪表见 `plan/` 下 dated 计划文件。
 
@@ -45,8 +45,9 @@
 | `skills/banyan-gate-verify` | 验证门禁 | 步骤完成后验收 |
 | `skills/banyan-exec-log` | 执行日志 | 任何关键操作/决策 |
 | `skills/banyan-resume` | 断点恢复 | 新会话接手旧任务 |
+| `skills/banyan-archive` | 周归档与回溯 | 跨周/日志膨胀/查旧账 |
 
-五个 Skill 形成闭环：
+六个 Skill 形成闭环：
 
 ```
 banyan-plan-draft（起草）→ banyan-plan-track（开始步骤）
@@ -56,6 +57,8 @@ banyan-exec-log（全程记日志）← banyan-gate-verify（门禁验收）
 banyan-plan-track（标记完成）
       ↓
 banyan-resume（新会话从断点接力）
+      ↓
+banyan-archive（跨周/轮次边界归档，周切片+快照+索引）
 ```
 
 ### 1.3 设计原则
@@ -75,11 +78,11 @@ banyan-resume（新会话从断点接力）
 
 本地仓库版：
 
-> 请读取本仓库 skills/banyan-plan-draft、banyan-plan-track、banyan-gate-verify、banyan-exec-log、banyan-resume 下的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+> 请读取本仓库 skills/banyan-plan-draft、banyan-plan-track、banyan-gate-verify、banyan-exec-log、banyan-resume、banyan-archive 下的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
 
 新项目版（空目录，AI 自己 clone）：
 
-> 把 https://github.com/AiToByte/Banyan 克隆到 ./banyan-skills，读取其中 5 个 Skill 的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+> 把 https://github.com/AiToByte/Banyan 克隆到 ./banyan-skills，读取其中 6 个 Skill 的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
 
 直驱覆盖日常使用；下面 2.1–2.4 的链接安装是"自动触发"增强项（装完 Agent 无需指引自动加载），按需再做。
 
@@ -89,8 +92,10 @@ banyan-resume（新会话从断点接力）
 Banyan/
 ├── README.md                        # 中英双语入口
 ├── CLAUDE.md                        # 任务执行与断点续传协议（总纲）
-├── TASK_PLAN.md                     # 总体执行计划 + 实时进度状态机（精简投影）
-├── EXEC_LOG.md                      # 详细执行流水账（append-only）
+├── TASK_PLAN.md                     # 总体执行计划 + 实时进度状态机（精简投影，本轮）
+├── EXEC_LOG.md                      # 执行流水账（活跃周 + 顶部归档指针）
+├── archive/                         # 周归档（年→月→周，见 §3.5）
+│   └── 2026/2026-09/W38_0914-0920/  # 周实例：切片 + 快照 + 周README
 ├── plan/                            # dated 计划文件（时间+计划号命名，执行跟踪表）
 │   └── 2026年9月16日-P1实施计划.md
 ├── docs/
@@ -112,8 +117,12 @@ Banyan/
 │   ├── banyan-exec-log/
 │   │   ├── SKILL.md
 │   │   └── templates/log-fragments.md
-│   └── banyan-resume/
-│       └── SKILL.md
+│   ├── banyan-resume/
+│   │   └── SKILL.md
+│   └── banyan-archive/
+│       ├── SKILL.md
+│       ├── templates/archive-readme-templates.md
+│       └── references/archive-rules.md
 ├── scripts/                         # 安装与校验脚本
 │   ├── install-skills.ps1           # Windows 重建链接（首选）
 │   └── install-skills.sh            # macOS / Linux 重建链接
@@ -136,7 +145,7 @@ Banyan/
 
 ### 2.3 创建 / 维护目录联接（首选脚本，一键重建）
 
-> 首选直接运行仓库脚本（自动删旧副本→建链接→校验 15 条链路）。**装完脚本会直接输出 5 句可用话，照着说一句即可开工。**
+> 首选直接运行仓库脚本（自动删旧副本→建链接→校验 18 条链路）。**装完脚本会直接输出 6 句可用话，照着说一句即可开工。**
 >
 > ```powershell
 > # Windows（PowerShell 5.1 可用，/J 免管理员）
@@ -153,7 +162,7 @@ Windows（`mklink /J`，免管理员）：
 
 ```powershell
 New-Item -ItemType Directory -Force .claude\skills, .opencode\skills, .agents\skills
-foreach ($s in "banyan-plan-draft","banyan-plan-track","banyan-gate-verify","banyan-exec-log","banyan-resume") {
+foreach ($s in "banyan-plan-draft","banyan-plan-track","banyan-gate-verify","banyan-exec-log","banyan-resume","banyan-archive") {
   cmd /c mklink /J ".claude\skills\$s"   "skills\$s"
   cmd /c mklink /J ".opencode\skills\$s" "skills\$s"
   cmd /c mklink /J ".agents\skills\$s"   "skills\$s"
@@ -164,7 +173,7 @@ macOS / Linux（符号链接）：
 
 ```bash
 mkdir -p .claude/skills .opencode/skills .agents/skills
-for s in banyan-plan-draft banyan-plan-track banyan-gate-verify banyan-exec-log banyan-resume; do
+for s in banyan-plan-draft banyan-plan-track banyan-gate-verify banyan-exec-log banyan-resume banyan-archive; do
   ln -s "../../skills/$s" ".claude/skills/$s"
   ln -s "../../skills/$s" ".opencode/skills/$s"
   ln -s "../../skills/$s" ".agents/skills/$s"
@@ -176,7 +185,7 @@ done
 ### 2.4 安装校验
 
 ```bash
-# 预期：三个目录各列出 5 个条目，且每个 SKILL.md 可读
+# 预期：三个目录各列出 6 个条目（共 18 条链路），且每个 SKILL.md 可读
 ls .claude/skills/ .opencode/skills/ .agents/skills/
 
 # 校验一个 skill 可被正常解析
@@ -223,7 +232,11 @@ head -4 skills/banyan-resume/SKILL.md       # mac/linux，应见 YAML frontmatte
 
 ### 3.4 与 iot-kernel 式计划的关系
 
-本套件将 iot-kernel 的 `docs/plan/` 实施计划格式（状态总览表 + 阶段拆解表 + 验证门禁 + 延后声明 + 执行日志）移植到 Banyan。dated 计划文件就是"本轮的执行跟踪表"，`TASK_PLAN.md` 是它的精简投影，`EXEC_LOG.md` 是全程流水账。
+本套件将 iot-kernel 的 `docs/plan/` 实施计划格式（状态总览表 + 阶段拆解表 + 验证门禁 + 延后声明 + 执行日志）移植到 Banyan。dated 计划文件就是"本轮的执行跟踪表"，`TASK_PLAN.md` 是它的精简投影，`EXEC_LOG.md` 是活跃周流水账，`archive/` 是按年→月→周沉淀的历史。
+
+### 3.5 自动归档：年→月→周（`banyan-archive`）
+
+根 `EXEC_LOG.md` 只留活跃周，历史按周切片搬运到 `archive/YYYY/YYYY-MM/Wxx_MMDD-MMDD/`；`TASK_PLAN.md` 按轮快照同目录；总/年/月/周四级 README 互链索引。触发条件：跨 ISO 周（周一为周首）/ 超 300 行 / 超 60KB / 新轮起草前。搬运三步原子（复制→校验条目数与首尾时间戳→截断并追加归档指针），归档落盘后只读。回溯时默认只读根双轨 + `archive/README.md` 总索引，命中再下钻（90% 止于周 README）。详见 `skills/banyan-archive/SKILL.md`。
 
 ---
 
@@ -508,7 +521,33 @@ dated 文末同步一行：
 
 - 恢复流程中不改代码、不覆盖文件。
 - 双轨不一致 → 先修一致再继续，修复记入 `EXEC_LOG.md`。
-- 找不到 dated 计划 → 提示指定路径或执行 `banyan-plan-draft` 新建。
+- 找不到 dated 计划 → 先查 `archive/README.md` 总索引（按需下钻），找不到再提示指定路径或执行 `banyan-plan-draft` 新建。
+
+---
+
+## 4.6 `banyan-archive`（归档与回溯）
+
+### 用途
+
+按年→月→周归档 `EXEC_LOG.md`（周切片搬运）与 `TASK_PLAN.md`（按轮快照），维护四级索引，供后续查阅回溯。根文件永远只留活跃内容。
+
+### 何时触发 / 何时不触发
+
+- 触发：跨周 / 超 300 行 / 超 60KB / 新轮起草前；说"归档一下""这周收尾归档""查一下上周日志""旧账怎么查""EXEC_LOG太长了"
+- 不触发：修改计划状态、执行门禁、追加日常日志、恢复断点
+
+### 关键规则
+
+- 周定义：ISO 8601 周一为周首，目录 `Wxx_MMDD-MMDD`；跨月周按周一所在月份归属。
+- 搬运三步：复制 → 校验（条目数 + 首尾时间戳）→ 截断并追加归档指针行。
+- 归档落盘后只读；纠错只在根 `EXEC_LOG.md` 追加勘误行。
+- 回溯：默认读根 + 总索引，按需下钻年→月→周。
+
+### 约束红线
+
+- 截断是 append-only 的唯一授权例外，其他 Skill 不得截断。
+- 切片不断条（按 `### [YYYY-MM-DD HH:MM]` 条目切分）。
+- `archive/`（周归档）与 `docs/archive/`（manual 追溯）不得混放。
 
 ---
 
@@ -523,6 +562,7 @@ dated 文末同步一行：
 | 验收 | 这步改完了，跑下门禁看看能不能合。 | `banyan-gate-verify` |
 | 记现场 | 刚才的改动和报错记一下。 | `banyan-exec-log` |
 | 换会话接力 | 继续任务，直接从断点往下做。 | `banyan-resume` |
+| 归档查旧账 | 这周收尾归档一下（/查一下上周日志）。 | `banyan-archive` |
 
 ## 场景 A：全新任务从零开始（完整周期）
 
@@ -576,6 +616,8 @@ dated 文末同步一行：
 | banyan-plan-track | `references/status-legend.md` | 五态定义 + 双写映射表 |
 | banyan-gate-verify | `references/gate-checklist.md` | 各语言门禁命令 + 报告模板 |
 | banyan-exec-log | `templates/log-fragments.md` | 五种日志片段模板 |
+| banyan-archive | `templates/archive-readme-templates.md` | 总/年/月/周四级 README + 快照头模板 |
+| banyan-archive | `references/archive-rules.md` | 周定义 / 切分规则 / 校验清单 |
 
 ---
 
@@ -590,7 +632,8 @@ dated 文末同步一行：
 > - Q5 完成步骤能否回退 → 默认不可，除非用户明确要求
 > - Q6 超过 8 步 → 合并或拆多轮，子项表不计入上限
 > - Q7 手册与 SKILL 冲突听谁 → 听 `SKILL.md`
-> - Q8 文件会泛滥吗 → dated 一轮一个自然归档，不会膨胀
+> - Q8 文件会泛滥吗 → dated 一轮一个 + EXEC_LOG 按周切片归档，根文件永远有界
+> - Q11 归档与查旧账 → 跨周/超 300 行/超 60KB 触发 `banyan-archive`，先读 `archive/README.md` 再下钻
 
 ---
 
@@ -606,6 +649,8 @@ dated 文末同步一行：
 | 零容忍 | clippy 等静态分析不允许出现新告警 |
 | 断点接力 | 新会话通过读文件秒级接续旧任务 |
 | 渐进披露 | 只加载 `name+description`，选中后才读 SKILL.md 全文 |
+| 周归档 | `archive/YYYY/YYYY-MM/Wxx_MMDD-MMDD/`，周切片 + 快照 + 周README，只读 |
+| 归档指针 | 根 `EXEC_LOG.md` 顶部的搬运记录行，指向最新归档周目录 |
 | Frontmatter | SKILL.md 顶部 `---` 之间的 YAML 元数据 |
 
 ---

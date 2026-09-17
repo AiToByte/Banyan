@@ -5,8 +5,8 @@ description: 维护任务状态机：在 dated 计划文件和 TASK_PLAN.md 之�
 
 # Banyan 计划跟踪技能
 
-> 版本：1.2（2026-09-16）
-> 关联 Skill：`banyan-plan-draft`（起草）、`banyan-gate-verify`（标 ✅ 前先过门禁）、`banyan-exec-log`（状态变更配套记日志）。冲突时以本 SKILL.md 为准。
+> 版本：1.3（2026-09-17）
+> 关联 Skill：`banyan-plan-draft`（起草）、`banyan-gate-verify`（标 ✅ 前先过门禁）、`banyan-exec-log`（状态变更配套记日志）、`banyan-archive`（本轮完成后快照引用）。冲突时以本 SKILL.md 为准。
 
 你是任务状态机的唯一维护者。所有步骤状态变更必须通过你双写到 dated 计划文件和 `TASK_PLAN.md`，确保两份文件始终一致。
 
@@ -58,3 +58,4 @@ description: 维护任务状态机：在 dated 计划文件和 TASK_PLAN.md 之�
 - 禁止静默修改已完成步骤的状态（`✅` 不可回退，除非用户明确要求）。
 - 备注列的写法遵循 iot-kernel 规范：数量变化（`97→99通过`）、门禁结果（`clippy零告警`）、关键决策（`经论证否决`）。
 - 当子项表（拆解表）存在时，子项状态也需同步更新到对应子行。
+- 本轮完成后 `TASK_PLAN.md` 由 `banyan-archive` 快照到周目录，历史节只留索引指针（如 `P4详见archive/2026/2026-09/W38_0914-0920/`），不再堆全文。

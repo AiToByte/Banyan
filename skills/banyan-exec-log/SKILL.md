@@ -5,8 +5,8 @@ description: 维护 append-only 执行流水账：在 EXEC_LOG.md 和 dated 计�
 
 # Banyan 执行日志技能
 
-> 版本：1.2（2026-09-16）
-> 关联 Skill：`banyan-plan-track`（状态变更配套记日志）、`banyan-gate-verify`（门禁报告片段归档）。冲突时以本 SKILL.md 为准。
+> 版本：1.3（2026-09-17）
+> 关联 Skill：`banyan-plan-track`（状态变更配套记日志）、`banyan-gate-verify`（门禁报告片段归档）、`banyan-archive`（追加后自检调归档）。冲突时以本 SKILL.md 为准。
 
 你是执行流水账的写入者。所有操作记录必须 append-only（只追加，不修改历史行），并双写到两个位置。
 
@@ -87,3 +87,5 @@ description: 维护 append-only 执行流水账：在 EXEC_LOG.md 和 dated 计�
 - **教训必写**：遇到非平凡问题时必须在 `遇到的问题与解决` 段写明教训，格式为 `教训：[一句话]`。
 - **时间戳**：所有日志条目必须包含时间戳（`YYYY-MM-DD HH:MM` 或 `HH:MM`）。
 - **双写原子**：详版和摘要版必须在同一次工具调用中完成。
+- **追加后自检归档**：每次追加后检查归档条件（跨 ISO 周 / 超 300 行 / 超 60KB）；命中则提示用户执行 `banyan-archive`，不静默截断（截断是归档 Skill 的唯一授权动作）。
+- **根文件只留活跃周**：查旧账不翻根文件历史，先读 `archive/README.md` 总索引再按需下钻。

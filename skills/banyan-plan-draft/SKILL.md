@@ -5,8 +5,8 @@ description: 将需求拆解为可执行的分阶段计划并初始化双轨文�
 
 # Banyan 计划起草技能
 
-> 版本：1.2（2026-09-16）
-> 关联 Skill：`banyan-plan-track`（状态双写）、`banyan-exec-log`（日志双写）。计划文件落 `plan/`，冲突时以本 SKILL.md 为准。
+> 版本：1.3（2026-09-17）
+> 关联 Skill：`banyan-plan-track`（状态双写）、`banyan-exec-log`（日志双写）、`banyan-archive`（起草前必查归档）。计划文件落 `plan/`，冲突时以本 SKILL.md 为准。
 
 你必须在任何代码修改前，将需求转化为结构化的分阶段实施计划。计划格式遵循 iot-kernel 跟踪表规范，并同步初始化 Banyan 双轨文件。
 
@@ -15,6 +15,7 @@ description: 将需求拆解为可执行的分阶段计划并初始化双轨文�
 1. 读取 `references/iot-kernel-format.md` 了解 iot-kernel 计划格式规范。
 2. 读取 `templates/plan-template.md` 获取可直接填充的模板。
 3. 如果工作区已存在 `TASK_PLAN.md` 且有未完成步骤，先确认用户是要追加/替换/新建，禁止自动覆盖。
+4. 起草前必查归档：读取根 `EXEC_LOG.md` 顶部归档指针行；若上轮已完成且命中归档条件（跨 ISO 周 / 超 300 行 / 超 60KB），先执行 `banyan-archive` 再起草新轮。
 
 ## 拆解方法
 

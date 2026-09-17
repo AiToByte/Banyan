@@ -53,4 +53,5 @@
 * 新会话先读：`README.md`（中英双语入口）→ `docs/index.md`（导航）→ `docs/handbook.md`（Skill 手册现行）→ `docs/faq.md`。
 * Skill 规范源：`skills/`（唯一源）；`.claude/skills`、`.opencode/skills`、`.agents/skills` 为本地链接，由 `scripts/install-skills.ps1` / `scripts/install-skills.sh` 重建，不入库。
 * 任务跟踪表：`plan/` 下 dated 计划文件（时间+计划号命名），`TASK_PLAN.md` 为其精简投影。
+* 日志有界：`EXEC_LOG.md` 根只留活跃周，旧账先读 `archive/README.md` 总索引再按需下钻；归档执行唯一走 `skills/banyan-archive/SKILL.md`（搬运三步原子，落盘后只读）。
 * 冲突时以 `skills/<name>/SKILL.md` 为准。

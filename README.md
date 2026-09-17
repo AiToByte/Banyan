@@ -5,7 +5,7 @@
 > A cross-session task-continuity skill suite for coding agents: persist plans and execution context to local Markdown, so switching models/agents/windows resumes in seconds.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Skills: 5](https://img.shields.io/badge/skills-5-blue.svg)](skills/)
+[![Skills: 6](https://img.shields.io/badge/skills-6-blue.svg)](skills/)
 [![Docs](https://img.shields.io/badge/docs-handbook-orange.svg)](docs/handbook.md)
 
 ---
@@ -25,7 +25,7 @@ Banyan 的解决思路是**外部状态持久化 + 上下文解耦**：不依赖
 - **通用兼容**：Skill frontmatter 只用 `name + description` 交集字段，Claude Code / OpenCode / Codex / Gemini CLI 均可发现加载。
 - **渐进披露**：`SKILL.md` 只写指令，长参考放 `references/`、模板放 `templates/`，按需读取省 Token。
 
-### 五个 Skill 一览
+### 六个 Skill 一览
 
 | Skill | 职责 | 触发时机 |
 |-------|------|----------|
@@ -34,8 +34,9 @@ Banyan 的解决思路是**外部状态持久化 + 上下文解耦**：不依赖
 | `banyan-gate-verify` | 门禁四段验证（格式/静态/测试/性能数量，含文档型分支） | 步骤完成验收 / "跑一下门禁" |
 | `banyan-exec-log` | append-only 流水账，双写 `EXEC_LOG.md` + dated 文末 | 关键操作 / 决策 / "记一下" |
 | `banyan-resume` | 断点恢复：三读定位断点并汇报，直接继续 | 新会话 / "继续任务 / 断点恢复" |
+| `banyan-archive` | 年→月→周自动归档 + 查旧账回溯 | 跨周 / 日志膨胀 / "归档一下 / 查一下上周日志" |
 
-闭环：`plan-draft（起草）→ plan-track（开始）→ exec-log（记）→ gate-verify（验收）→ plan-track（完成）→ resume（接力）`。
+闭环：`plan-draft（起草）→ plan-track（开始）→ exec-log（记）→ gate-verify（验收）→ plan-track（完成）→ resume（接力）→ archive（归档）`。
 
 详见 [`docs/handbook.md`](docs/handbook.md)，常见问题见 [`docs/faq.md`](docs/faq.md)。
 
@@ -45,13 +46,13 @@ Banyan 的解决思路是**外部状态持久化 + 上下文解耦**：不依赖
 
 本地仓库（已在 Banyan 目录里开 Agent）：
 
-> 请读取本仓库 skills/banyan-plan-draft、banyan-plan-track、banyan-gate-verify、banyan-exec-log、banyan-resume 下的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+> 请读取本仓库 skills/banyan-plan-draft、banyan-plan-track、banyan-gate-verify、banyan-exec-log、banyan-resume、banyan-archive 下的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
 
 新项目（空目录开 Agent，AI 自己 clone）：
 
-> 把 https://github.com/AiToByte/Banyan 克隆到 ./banyan-skills，读取其中 5 个 Skill 的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
+> 把 https://github.com/AiToByte/Banyan 克隆到 ./banyan-skills，读取其中 6 个 Skill 的 SKILL.md 并严格遵守其中的任务规划与断点续传协议；然后先出方案再动手：【把你的需求粘在这里】。
 
-> **进阶：自动触发**：想让 Agent 不用读文件自动触发 Skill，再运行下面对应的一行命令（装完脚本会直接给出 5 句可用话）。
+> **进阶：自动触发**：想让 Agent 不用读文件自动触发 Skill，再运行下面对应的一行命令（装完脚本会直接给出 6 句可用话）。
 
 ```powershell
 # Windows（一行命令，/J 免管理员）
@@ -70,6 +71,7 @@ bash scripts/install-skills.sh
 1. **新任务**："帮我实现 XXX。先制定计划。"→ Agent 触发 `banyan-plan-draft`，在 `plan/` 建 dated 计划 + 初始化 `TASK_PLAN.md`，向你确认后开工。
 2. **执行中**：Agent 按 `plan-track` 双写状态、`exec-log` 追加日志、`gate-verify` 跑门禁，全绿才标 `✅`。
 3. **中断接力**：新窗口只说"继续任务" → Agent 触发 `banyan-resume`，三读双轨文件，输出断点接力报告并直接继续。
+4. **归档查旧账**：跨周或日志膨胀时说"这周收尾归档一下" → Agent 触发 `banyan-archive`，周切片 + 快照 + 索引落 `archive/`；查旧账先读 `archive/README.md` 再下钻。
 
 **一句话速查**（复制即用，不用敲 `/命令`；与 `docs/handbook.md` §5 同步）：
 
@@ -80,6 +82,7 @@ bash scripts/install-skills.sh
 | 验收 | 这步改完了，跑下门禁看看能不能合。 |
 | 记现场 | 刚才的改动和报错记一下。 |
 | 换会话接力 | 继续任务，直接从断点往下做。 |
+| 归档查旧账 | 这周收尾归档一下（/查一下上周日志）。 |
 
 换模型接力指令（一句话即可）：
 
@@ -92,8 +95,10 @@ Banyan/
 ├── README.md                      # 本文件（中英双语入口）
 ├── CLAUDE.md                      # 任务执行与断点续传协议（总纲）
 ├── TASK_PLAN.md                   # 本轮精简状态投影（实时更新）
-├── EXEC_LOG.md                    # 执行流水账（append-only）
+├── EXEC_LOG.md                    # 执行流水账（活跃周 + 顶部归档指针）
 ├── LICENSE                        # MIT
+├── archive/                       # 周归档（年→月→周：切片 + 快照 + 索引，只读）
+│   └── 2026/2026-09/W38_0914-0920/  # 周实例示例
 ├── plan/                          # dated 计划文件（时间+计划号命名）
 │   └── 2026年9月16日-P1实施计划.md
 ├── docs/                          # 项目文档
@@ -106,7 +111,8 @@ Banyan/
 │   ├── banyan-plan-track/         # 跟踪
 │   ├── banyan-gate-verify/        # 门禁
 │   ├── banyan-exec-log/           # 日志
-│   └── banyan-resume/             # 断点恢复
+│   ├── banyan-resume/             # 断点恢复
+│   └── banyan-archive/           # 周归档与回溯
 ├── scripts/                       # 安装与校验脚本
 │   ├── install-skills.ps1
 │   └── install-skills.sh
@@ -139,6 +145,6 @@ Banyan/
 
 - **Problem**: free-model token quotas interrupt long tasks; switching models/agents/windows loses context and wastes tokens on re-planning.
 - **Approach**: externalize state to local Markdown (`TASK_PLAN.md` + dated plan in `plan/` + append-only `EXEC_LOG.md`) instead of relying on session memory.
-- **Suite**: 5 skills — `banyan-plan-draft` (plan), `banyan-plan-track` (state machine), `banyan-gate-verify` (4-gate acceptance incl. docs-only branch), `banyan-exec-log` (journal), `banyan-resume` (handover). One-line handover: "Session was reset. Read `TASK_PLAN.md` and `EXEC_LOG.md`, skip completed steps, continue from the first incomplete step."
+- **Suite**: 6 skills — `banyan-plan-draft` (plan), `banyan-plan-track` (state machine), `banyan-gate-verify` (4-gate acceptance incl. docs-only branch), `banyan-exec-log` (journal), `banyan-resume` (handover), `banyan-archive` (year→month→week archive: weekly EXEC_LOG slices + per-round TASK_PLAN snapshots + 4-level index under `archive/`). One-line handover: "Session was reset. Read `TASK_PLAN.md` and `EXEC_LOG.md`, skip completed steps, continue from the first incomplete step."
 - **Layout**: `skills/` is the single source of truth; `.claude/skills`, `.opencode/skills`, `.agents/skills` are links rebuilt by `scripts/install-skills.*`. Start at `docs/index.md`, handbook at `docs/handbook.md`, FAQ at `docs/faq.md`.
 - **License**: [MIT](LICENSE).
